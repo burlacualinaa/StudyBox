@@ -9,13 +9,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model User {
-  id      Int     @id @default(autoincrement())
-  name    String
-  email   String  @unique
-  phone   String?
-  quizzes Quiz[]
+  id        Int      @id @default(autoincrement())
+  name      String
+  firstName String?
+  lastName  String?
+  email     String   @unique
+  phone     String?
+  role      String   @default("student")
+  active    Boolean  @default(true)
+  quizzes   Quiz[]
 }
+
 model Quiz {
   id          Int      @id @default(autoincrement())
   title       String
