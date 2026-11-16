@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { addUser } from "../../../lib/userAccessor";
-
+import { userMapper, UserSource } from "../../../lib/UserMapper";
+import { UserDTO } from "../../../lib/UserDTO";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
       !name ||
       !email ||
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
-      !["student", "profesor"].includes(role) ||
+      !["student", "admin"].includes(role) ||
       typeof active !== "boolean"
     ) {
       return NextResponse.json(
@@ -48,7 +49,15 @@ export async function GET() {
   try {
     const users = await getAllUsers();
 
-    return NextResponse.json(users, { status: 200 });
+   const usersDTO = users.map((user) =>
+  userMapper.map(
+    Object.assign(new UserSource(), user),
+    UserSource,
+    UserDTO
+  )
+);
+
+return NextResponse.json(usersDTO, { status: 200 });
   } catch (error) {
     console.error("Eroare la citirea utilizatorilor:", error);
 
