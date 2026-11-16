@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@automapper/classes": "^8.8.1",
+    "@automapper/core": "^8.8.1",
     "@prisma/client": "^6.19.3",
     "bootstrap": "^5.3.8",
     "next": "16.4.0",
