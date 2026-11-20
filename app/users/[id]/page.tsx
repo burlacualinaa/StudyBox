@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { Suspense } from "react";
 import { getUserById } from "../../../lib/userAccessor";
@@ -8,7 +9,15 @@ export default function UserDetailsPage({
   params: Promise<{ id: string }>;
 }) {
   return (
-    <Suspense fallback={<p className="p-8">Se încarcă detaliile...</p>}>
+    <Suspense
+      fallback={
+        <div className="page-wrapper">
+          <div className="container-narrow">
+            <div className="skeleton" style={{ height: "240px", borderRadius: "var(--radius-lg)" }} />
+          </div>
+        </div>
+      }
+    >
       <UserDetailsLoader params={params} />
     </Suspense>
   );
@@ -20,77 +29,228 @@ async function UserDetailsLoader({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-
   return <UserDetails id={Number(id)} />;
 }
 
 async function UserDetails({ id }: { id: number }) {
   if (!Number.isInteger(id) || id <= 0) {
-    return <p className="p-8">ID invalid.</p>;
+    return (
+      <div className="page-wrapper">
+        <div className="container-narrow">
+          <div className="alert alert-error">⚠️ ID invalid.</div>
+        </div>
+      </div>
+    );
   }
 
-  // Citim utilizatorul prin accesor
   const user = await getUserById(id);
 
   if (!user) {
-    return <p className="p-8">Utilizatorul nu există.</p>;
+    return (
+      <div className="page-wrapper">
+        <div className="container-narrow">
+          <div className="alert alert-error">⚠️ Utilizatorul nu există.</div>
+          <Link href="/users" className="btn btn-ghost" style={{ marginTop: "1rem" }}>
+            ← Înapoi la utilizatori
+          </Link>
+        </div>
+      </div>
+    );
   }
 
+  const initials = user.name
+    .split(" ")
+    .map((w: string) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
   return (
-    <main className="min-h-screen bg-gray-100 p-8 text-gray-900">
-      <h1 className="mb-6 text-3xl font-bold">
-        Detalii utilizator
-      </h1>
+    <div className="page-wrapper">
+      <div className="container-narrow">
 
-      <div className="rounded border bg-white p-6 shadow">
-        <h2 className="mb-4 text-2xl font-semibold">
-          {user.name}
-        </h2>
-
-        <p><strong>ID:</strong> {user.id}</p>
-        <p><strong>Prenume:</strong> {user.firstName ?? "Nespecificat"}</p>
-        <p><strong>Nume:</strong> {user.lastName ?? "Nespecificat"}</p>
-        <p><strong>Email:</strong> {user.email}</p>
-        <p><strong>Telefon:</strong> {user.phone ?? "Nespecificat"}</p>
-        <p><strong>Rol:</strong> {user.role}</p>
-        <p>
-          <strong>Activ:</strong> {user.active ? "Da" : "Nu"}
-        </p>
-
-        <h3 className="mt-6 text-xl font-semibold">
-          Quizuri asociate
-        </h3>
-
-        {user.quizzes.length === 0 ? (
-          <p>Utilizatorul nu are quizuri.</p>
-        ) : (
-          <ul className="mt-2 list-disc pl-6">
-            {user.quizzes.map((quiz) => (
-              <li key={quiz.id}>
-                <strong>{quiz.title}</strong>
-                {" — "}
-                {quiz.description ?? "Fără descriere"}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div className="mt-6 flex gap-4">
-        <Link
-          href={`/users/${user.id}/edit`}
-          className="rounded bg-green-600 px-4 py-2 text-white"
-        >
-          Editează
-        </Link>
-
+        {/* Back */}
         <Link
           href="/users"
-          className="rounded bg-blue-600 px-4 py-2 text-white"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: ".4rem",
+            fontSize: ".875rem",
+            color: "var(--text-secondary)",
+            textDecoration: "none",
+            marginBottom: "1.75rem",
+            fontWeight: 500,
+          }}
         >
-          Înapoi la listă
+          ← Înapoi la utilizatori
         </Link>
+
+        {/* Profile card */}
+        <div className="card fade-up" style={{ marginBottom: "1.25rem" }}>
+          <div className="card-body">
+            {/* Avatar + name */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1.25rem",
+                marginBottom: "1.75rem",
+                flexWrap: "wrap",
+              }}
+            >
+              <div
+                className="avatar"
+                style={{ width: "4rem", height: "4rem", fontSize: "1.25rem" }}
+              >
+                {initials}
+              </div>
+              <div style={{ flex: 1 }}>
+                <h1
+                  style={{
+                    fontSize: "1.625rem",
+                    fontWeight: 900,
+                    margin: "0 0 .25rem",
+                    letterSpacing: "-.03em",
+                    color: "var(--text-primary)",
+                  }}
+                >
+                  {user.name}
+                </h1>
+                <div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap", alignItems: "center" }}>
+                  <span className={`badge ${user.role === "profesor" ? "badge-purple" : "badge-primary"}`}>
+                    {user.role === "profesor" ? "🎓 Profesor" : "📚 Student"}
+                  </span>
+                  <span className={`badge ${user.active ? "badge-success" : "badge-danger"}`}>
+                    {user.active ? "✓ Activ" : "✕ Inactiv"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="divider" />
+
+            {/* Info grid */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                gap: "1.25rem",
+                margin: "1.5rem 0",
+              }}
+            >
+              {[
+                { label: "ID", value: `#${user.id}`, icon: "🔖" },
+                { label: "Email", value: user.email, icon: "✉️" },
+                { label: "Telefon", value: user.phone ?? "–", icon: "📞" },
+                { label: "Prenume", value: user.firstName ?? "–", icon: "👤" },
+                { label: "Nume de familie", value: user.lastName ?? "–", icon: "👤" },
+              ].map((field) => (
+                <div
+                  key={field.label}
+                  style={{
+                    padding: "1rem",
+                    background: "var(--surface-50)",
+                    borderRadius: "var(--radius-sm)",
+                    border: "1px solid var(--surface-200)",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: ".7rem",
+                      fontWeight: 700,
+                      color: "var(--text-muted)",
+                      letterSpacing: ".08em",
+                      textTransform: "uppercase",
+                      marginBottom: ".35rem",
+                    }}
+                  >
+                    {field.icon} {field.label}
+                  </div>
+                  <div style={{ fontWeight: 600, color: "var(--text-primary)", fontSize: ".9375rem" }}>
+                    {field.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="divider" />
+
+            {/* Quizzes */}
+            <div style={{ marginTop: "1.5rem" }}>
+              <h2
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: 800,
+                  color: "var(--text-primary)",
+                  marginBottom: "1rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: ".5rem",
+                }}
+              >
+                📝 Quiz-uri asociate
+                <span className="badge badge-primary">{user.quizzes.length}</span>
+              </h2>
+
+              {user.quizzes.length === 0 ? (
+                <div
+                  style={{
+                    padding: "1.5rem",
+                    textAlign: "center",
+                    background: "var(--surface-50)",
+                    borderRadius: "var(--radius-sm)",
+                    border: "1px dashed var(--surface-300)",
+                    color: "var(--text-muted)",
+                    fontSize: ".9rem",
+                  }}
+                >
+                  Niciun quiz asociat acestui utilizator.
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: ".625rem" }}>
+                  {user.quizzes.map((quiz: { id: number; title: string; description: string | null }) => (
+                    <div
+                      key={quiz.id}
+                      style={{
+                        padding: ".875rem 1rem",
+                        background: "var(--surface-50)",
+                        border: "1px solid var(--surface-200)",
+                        borderRadius: "var(--radius-sm)",
+                        display: "flex",
+                        gap: ".75rem",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>📋</span>
+                      <div>
+                        <div style={{ fontWeight: 600, color: "var(--text-primary)", fontSize: ".9375rem" }}>
+                          {quiz.title}
+                        </div>
+                        {quiz.description && (
+                          <div style={{ fontSize: ".8125rem", color: "var(--text-muted)", marginTop: ".2rem" }}>
+                            {quiz.description}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="fade-up fade-up-1" style={{ display: "flex", gap: ".75rem", flexWrap: "wrap" }}>
+          <Link href={`/users/${user.id}/edit`} className="btn btn-primary">
+            ✏️ Editează utilizatorul
+          </Link>
+          <Link href="/users" className="btn btn-ghost">
+            ← Înapoi
+          </Link>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }

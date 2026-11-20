@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -17,19 +18,17 @@ export default function CreateUserPage() {
     const formData = new FormData(event.currentTarget);
 
     const user = {
-      name: String(formData.get("name") ?? "").trim(),
-      email: String(formData.get("email") ?? "").trim(),
-      phone: String(formData.get("phone") ?? "").trim(),
-      role: String(formData.get("role") ?? "student"),
+      name:   String(formData.get("name")  ?? "").trim(),
+      email:  String(formData.get("email") ?? "").trim(),
+      phone:  String(formData.get("phone") ?? "").trim(),
+      role:   String(formData.get("role")  ?? "student"),
       active: formData.get("active") === "on",
     };
 
     try {
       const response = await fetch("/api/users", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(user),
       });
 
@@ -41,110 +40,142 @@ export default function CreateUserPage() {
       router.push("/users");
       router.refresh();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "A apărut o eroare."
-      );
+      setError(err instanceof Error ? err.message : "A apărut o eroare.");
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-8 text-gray-900">
-      <h1 className="mb-6 text-3xl font-bold">
-        Adaugă utilizator
-      </h1>
+    <div className="page-wrapper">
+      <div className="container-narrow">
 
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-lg space-y-4 rounded border bg-white p-6 shadow"
-      >
-        <div>
-          <label htmlFor="name" className="block font-semibold">
-            Nume complet
-          </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            required
-            className="w-full rounded border p-2"
-          />
-        </div>
+        {/* Back link */}
+        <Link
+          href="/users"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: ".4rem",
+            fontSize: ".875rem",
+            color: "var(--text-secondary)",
+            textDecoration: "none",
+            marginBottom: "1.75rem",
+            fontWeight: 500,
+            transition: "color var(--transition)",
+          }}
+        >
+          ← Înapoi la utilizatori
+        </Link>
 
-        <div>
-          <label htmlFor="email" className="block font-semibold">
-            Email
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            className="w-full rounded border p-2"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="phone" className="block font-semibold">
-            Telefon
-          </label>
-          <input
-            id="phone"
-            name="phone"
-            type="text"
-            className="w-full rounded border p-2"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="role" className="block font-semibold">
-            Rol
-          </label>
-          <select
-            id="role"
-            name="role"
-            defaultValue="student"
-            className="w-full rounded border p-2"
-          >
-            <option value="student">Student</option>
-            <option value="profesor">Profesor</option>
-          </select>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <input
-            id="active"
-            name="active"
-            type="checkbox"
-            defaultChecked
-          />
-          <label htmlFor="active">Utilizator activ</label>
-        </div>
-
-        {error && (
-          <p role="alert" className="text-red-600">
-            {error}
+        {/* Page header */}
+        <div className="fade-up" style={{ marginBottom: "2rem" }}>
+          <span style={{ display: "block", fontSize: ".75rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--brand-500)", marginBottom: ".4rem" }}>
+            Utilizatori
+          </span>
+          <h1 style={{ fontSize: "2rem", fontWeight: 900, margin: "0 0 .4rem", letterSpacing: "-.03em", color: "var(--text-primary)" }}>
+            Adaugă utilizator
+          </h1>
+          <p style={{ color: "var(--text-secondary)", margin: 0 }}>
+            Completează detaliile pentru a înregistra un utilizator nou.
           </p>
-        )}
-
-        <div className="flex gap-3">
-          <button
-            type="submit"
-            disabled={saving}
-            className="rounded bg-green-600 px-4 py-2 text-white disabled:opacity-50"
-          >
-            {saving ? "Se salvează..." : "Salvează"}
-          </button>
-
-          <Link
-            href="/users"
-            className="rounded bg-gray-500 px-4 py-2 text-white"
-          >
-            Înapoi
-          </Link>
         </div>
-      </form>
-    </main>
+
+        {/* Form card */}
+        <div className="card fade-up fade-up-1">
+          <div className="card-body">
+            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+
+              {/* Nume */}
+              <div className="form-group">
+                <label htmlFor="name" className="form-label">Nume complet</label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  placeholder="ex. Ana Ionescu"
+                  className="form-control"
+                />
+              </div>
+
+              {/* Email */}
+              <div className="form-group">
+                <label htmlFor="email" className="form-label">Adresă email</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="ex. ana.ionescu@email.com"
+                  className="form-control"
+                />
+              </div>
+
+              {/* Telefon */}
+              <div className="form-group">
+                <label htmlFor="phone" className="form-label">
+                  Telefon{" "}
+                  <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "var(--text-muted)" }}>
+                    (opțional)
+                  </span>
+                </label>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="text"
+                  placeholder="ex. +40 721 000 000"
+                  className="form-control"
+                />
+              </div>
+
+              {/* Rol */}
+              <div className="form-group">
+                <label htmlFor="role" className="form-label">Rol în platformă</label>
+                <select id="role" name="role" defaultValue="student" className="form-control">
+                  <option value="student">📚 Student</option>
+                  <option value="profesor">🎓 Profesor</option>
+                </select>
+              </div>
+
+              {/* Activ */}
+              <label className="form-check">
+                <input id="active" name="active" type="checkbox" defaultChecked />
+                <span className="form-check-label">Cont activ</span>
+              </label>
+
+              {/* Error */}
+              {error && (
+                <div className="alert alert-error" role="alert">
+                  <span>⚠️</span>
+                  {error}
+                </div>
+              )}
+
+              {/* Actions */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: ".75rem",
+                  paddingTop: ".5rem",
+                  borderTop: "1px solid var(--surface-200)",
+                }}
+              >
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="btn btn-success"
+                >
+                  {saving ? "⏳ Se salvează..." : "✓ Salvează utilizatorul"}
+                </button>
+                <Link href="/users" className="btn btn-ghost">
+                  Anulează
+                </Link>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
