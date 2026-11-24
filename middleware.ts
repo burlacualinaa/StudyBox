@@ -1,41 +1,57 @@
+
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { verifySession } from "./lib/session";
 
-// Rute publice — nu necesită autentificare
+// Rute publice - nu necesita autentificare
 const PUBLIC_PATHS = ["/login", "/api/auth"];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Lasă libere rutele publice și fișierele statice
-  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
-  if (isPublic) return NextResponse.next();
+  // Permitem rutele publice
+  const isPublic = PUBLIC_PATHS.some(
+    (path) =>
+      pathname === path ||
+      pathname.startsWith(`${path}/`)
+  );
 
-  // Verifică cookie-ul de autentificare
-  const auth = request.cookies.get("sb-auth");
+  if (isPublic) {
+    return NextResponse.next();
+  }
 
-  if (!auth || auth.value !== "sb-authenticated-v1") {
+  // Verificam tokenul de sesiune semnat
+  const token = request.cookies.get("sb-auth")?.value;
+  const session = await verifySession(token);
+
+  if (!session) {
+    // Pentru API returnam 401, nu redirect HTML
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        { error: "Autentificare necesara." },
+        { status: 401 }
+      );
+    }
+
     const loginUrl = new URL("/login", request.url);
-    // Salvăm unde voia să ajungă, pentru redirect după login
+
+    // Pastram destinatia pentru redirect dupa login
     if (pathname !== "/") {
       loginUrl.searchParams.set("from", pathname);
     }
+
     return NextResponse.redirect(loginUrl);
   }
 
-  // Protecție secțiune Admin: doar utilizatorii cu rol admin sau profesor
+  // Protejam sectiunea Admin
   if (pathname.startsWith("/admin")) {
-    const userCookie = request.cookies.get("sb-user");
-    if (userCookie) {
-      try {
-        const user = JSON.parse(userCookie.value);
-        if (user.role !== "admin" && user.role !== "profesor") {
-          // Utilizatorii obișnuiți (studenți) sunt redirecționați pe prima pagină
-          return NextResponse.redirect(new URL("/?access_denied=admin", request.url));
-        }
-      } catch {
-        return NextResponse.redirect(new URL("/login", request.url));
-      }
+    if (
+      session.role !== "admin" &&
+      session.role !== "profesor"
+    ) {
+      return NextResponse.redirect(
+        new URL("/?access_denied=admin", request.url)
+      );
     }
   }
 
@@ -45,9 +61,9 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Protejează toate rutele EXCEPTÂND:
-     * - _next/static  (fișiere Next.js)
-     * - _next/image   (optimizare imagini)
+     * Protejam toate rutele, exceptand:
+     * - _next/static
+     * - _next/image
      * - favicon.ico
      */
     "/((?!_next/static|_next/image|favicon.ico).*)",

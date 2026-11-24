@@ -30,3 +30,6 @@ export async function updateUser(
 ) {
   return userService.updateUser(id, data);
 }
+export async function deleteUser(id: number) {
+  return userService.deleteUser(id);
+}
