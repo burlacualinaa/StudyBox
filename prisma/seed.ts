@@ -14,12 +14,6 @@ async function main() {
     },
   });
 
-  const category = await prisma.category.upsert({
-    where: { name: "Programare" },
-    update: {},
-    create: { name: "Programare" },
-  });
-
   const existingQuiz = await prisma.quiz.findFirst({
     where: {
       title: "Quiz de test",
@@ -38,7 +32,6 @@ async function main() {
     }));
 
   console.log("Utilizator:", user.name, "| ID:", user.id);
-  console.log("Categorie:", category.name);
   console.log("Quiz:", quiz.title, "| ID:", quiz.id);
 }
 
