@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     if (
       !Number.isInteger(userId) ||
       userId <= 0 ||
-      !["Basic", "Premium", "Pro"].includes(plan) ||
+      !["Gratuit", "Basic", "Premium", "Pro"].includes(plan) ||
       !Number.isFinite(price) ||
       price < 0 ||
       Number.isNaN(startDate.getTime()) ||
