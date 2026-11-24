@@ -24,21 +24,33 @@ export interface IUserRepository {
   getById(id: number): Promise<UserWithQuizzes | null>;
   create(data: UserData): Promise<User>;
   update(id: number, data: UserData): Promise<User>;
+  softDelete(id: number): Promise<User>;
 }
 
 export class UserRepository implements IUserRepository {
   async getAll(): Promise<UserWithQuizzes[]> {
-    return prisma.user.findMany({
-      include: { quizzes: true },
-    });
-  }
+  return prisma.user.findMany({
+    where: { isDeleted: false },
+    include: { quizzes: true },
+  });
+}
 
-  async getById(id: number): Promise<UserWithQuizzes | null> {
-    return prisma.user.findUnique({
-      where: { id },
-      include: { quizzes: true },
-    });
-  }
+async getById(id: number): Promise<UserWithQuizzes | null> {
+  return prisma.user.findFirst({
+    where: {
+      id,
+      isDeleted: false,
+    },
+    include: { quizzes: true },
+  });
+}
+
+async softDelete(id: number): Promise<User> {
+  return prisma.user.update({
+    where: { id, isDeleted: false },
+    data: { isDeleted: true },
+  });
+}
 
   async create(data: UserData): Promise<User> {
     return prisma.user.create({

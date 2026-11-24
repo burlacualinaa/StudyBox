@@ -1,7 +1,14 @@
+
 import { NextResponse } from "next/server";
-import { updateUser } from "../../../../lib/userAccessor";
+import {
+  updateUser,
+  getUserById,
+  deleteUser,
+} from "../../../../lib/userAccessor";
 import { userMapper, UserSource } from "../../../../lib/UserMapper";
 import { UserDTO } from "../../../../lib/UserDTO";
+
+// PUT - Actualizare utilizator
 export async function PUT(
   request: Request,
   context: { params: Promise<{ id: string }> }
@@ -55,8 +62,8 @@ export async function PUT(
     );
   }
 }
-import { getUserById } from "../../../../lib/userAccessor";
 
+// GET - Obtinere utilizator dupa ID
 export async function GET(
   request: Request,
   context: { params: Promise<{ id: string }> }
@@ -76,23 +83,64 @@ export async function GET(
 
     if (!user) {
       return NextResponse.json(
-        { error: "Utilizatorul nu există." },
+        { error: "Utilizatorul nu exista sau a fost sters." },
         { status: 404 }
       );
     }
 
     const userDTO = userMapper.map(
-  Object.assign(new UserSource(), user),
-  UserSource,
-  UserDTO
-);
+      Object.assign(new UserSource(), user),
+      UserSource,
+      UserDTO
+    );
 
-return NextResponse.json(userDTO, { status: 200 });
+    return NextResponse.json(userDTO, { status: 200 });
   } catch (error) {
     console.error("Eroare la citirea utilizatorului:", error);
 
     return NextResponse.json(
-      { error: "Nu s-au putut încărca detaliile." },
+      { error: "Nu s-au putut incarca detaliile." },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE - Stergere logica (Soft Delete)
+export async function DELETE(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+    const userId = Number(id);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return NextResponse.json(
+        { error: "ID invalid." },
+        { status: 400 }
+      );
+    }
+
+    const user = await deleteUser(userId);
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Utilizatorul nu exista sau a fost deja sters." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        message: "Utilizator sters logic cu succes.",
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Eroare la stergerea utilizatorului:", error);
+
+    return NextResponse.json(
+      { error: "Nu s-a putut sterge utilizatorul." },
       { status: 500 }
     );
   }

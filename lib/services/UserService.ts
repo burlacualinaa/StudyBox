@@ -36,4 +36,17 @@ export class UserService {
 
     return this.userRepository.update(id, data);
   }
+  async deleteUser(id: number) {
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new Error("ID invalid");
+  }
+
+  const user = await this.userRepository.getById(id);
+
+  if (!user) {
+    return null;
+  }
+
+  return this.userRepository.softDelete(id);
+}
 }
