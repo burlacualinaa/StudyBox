@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import NotificationBell from "./NotificationBell";
 
 type User = { name: string; email: string; role: string } | null;
 
@@ -149,9 +150,12 @@ export default function Header({ user }: { user: User }) {
 
         {/* User area */}
         {user && (
-          <div style={{ position: "relative" }}>
-            <button
-              onClick={() => setMenuOpen((v) => !v)}
+          <div style={{ display: "flex", alignItems: "center", gap: ".65rem" }}>
+            <NotificationBell />
+
+            <div style={{ position: "relative" }}>
+              <button
+                onClick={() => setMenuOpen((v) => !v)}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -331,6 +335,7 @@ export default function Header({ user }: { user: User }) {
                 </div>
               </>
             )}
+            </div>
           </div>
         )}
       </div>

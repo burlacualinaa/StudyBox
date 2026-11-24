@@ -13,7 +13,8 @@ export const metadata: Metadata = {
 
 async function HeaderWithUser() {
   const cookieStore = await cookies();
-  const userCookie  = cookieStore.get("sb-user");
+  const userCookie = cookieStore.get("sb-user");
+
   const user = userCookie
     ? (() => {
         try {
@@ -37,9 +38,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ro" data-scroll-behavior="smooth" className="h-full antialiased">
-      <body style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-        <Suspense fallback={<Header user={null} />}>
+    <html
+      lang="ro"
+      data-scroll-behavior="smooth"
+      className="h-full antialiased"
+    >
+      <body
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* Header incarcat in Suspense */}
+        <Suspense
+          fallback={
+            <div
+              style={{
+                minHeight: "70px",
+                width: "100%",
+              }}
+            />
+          }
+        >
           <HeaderWithUser />
         </Suspense>
 
@@ -64,19 +85,54 @@ export default function RootLayout({
               gap: ".75rem",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: ".5rem" }}>
-              <span style={{ fontSize: "1.25rem" }}>🎓</span>
-              <span style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: ".9rem" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: ".5rem",
+              }}
+            >
+              <span style={{ fontSize: "1.25rem" }}>
+                🎓
+              </span>
+
+              <span
+                style={{
+                  fontWeight: 700,
+                  color: "var(--text-primary)",
+                  fontSize: ".9rem",
+                }}
+              >
                 StudyBox
               </span>
             </div>
-            <span style={{ fontSize: ".8125rem", color: "var(--text-muted)" }}>
+
+            <span
+              style={{
+                fontSize: ".8125rem",
+                color: "var(--text-muted)",
+              }}
+            >
               © 2026 StudyBox · Platformă educațională
             </span>
-            <div style={{ display: "flex", gap: "1.25rem" }}>
-              <a href="/"      className="footer-link">Acasă</a>
-              <a href="/users" className="footer-link">Utilizatori</a>
-              <a href="/admin" className="footer-link">Admin</a>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "1.25rem",
+              }}
+            >
+              <a href="/" className="footer-link">
+                Acasă
+              </a>
+
+              <a href="/users" className="footer-link">
+                Utilizatori
+              </a>
+
+              <a href="/admin" className="footer-link">
+                Admin
+              </a>
             </div>
           </div>
         </footer>
