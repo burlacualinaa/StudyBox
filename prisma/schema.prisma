@@ -9,31 +9,45 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  firstName String?
-  lastName  String?
-  email     String   @unique
-  phone     String?
-  role      String   @default("student")
-  active    Boolean  @default(true)
-  quizzes   Quiz[]
-   subscriptions Subscription[]
+  id           Int            @id @default(autoincrement())
+  name         String
+  firstName    String?
+  lastName     String?
+  email        String         @unique
+  phone        String?
+  role         String         @default("student")
+  active       Boolean        @default(true)
+  isDeleted Boolean @default(false)
+  passwordHash String?
+  quizzes       Quiz[]
+  subscriptions Subscription[]
+  notifications Notification[]
 }
 
 model Quiz {
   id          Int      @id @default(autoincrement())
   title       String
   description String?
+  questions   Json?
+  isPublic    Boolean  @default(true)
   userId      Int
-  createdAt DateTime @default(now())
+  createdAt   DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id])
 }
 
-model Category {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  title     String
+  message   String
+  type      String   @default("info")
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
 model Subscription {
   id        Int      @id @default(autoincrement())
   userId    Int
