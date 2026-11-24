@@ -12,8 +12,11 @@
     "@automapper/classes": "^8.8.1",
     "@automapper/core": "^8.8.1",
     "@prisma/client": "^6.19.3",
+    "@types/pdf-parse": "^1.1.5",
     "bootstrap": "^5.3.8",
-    "next": "16.4.0",
+    "jose": "^6.2.18",
+    "next": "16.4.6",
+    "pdf-parse": "^2.4.5",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
